@@ -46,11 +46,11 @@ void pico_set_led(bool led_on) {
     }
 
 void gpio_callback() {
-    pico_set_led(led_on);
-    printf("Button press Number: %d\n", count);
     // toggle LED and iterate count
     led_on = !led_on;
     count ++;
+    pico_set_led(led_on);
+    printf("Button press Number: %d\n", count);
 }
 
 

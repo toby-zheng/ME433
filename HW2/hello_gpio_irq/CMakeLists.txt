@@ -35,14 +35,22 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(hello_gpio_irq
-        hello_gpio_irq.c
-        )
+if (TARGET tinyusb_device)
+    add_executable(hello_gpio_irq
+            hello_gpio_irq.c
+            )
 
-# pull in common dependencies
-target_link_libraries(hello_gpio_irq pico_stdlib)
+    # pull in common dependencies
+    target_link_libraries(hello_gpio_irq pico_stdlib)
 
-# create map/bin/hex file etc.
-pico_add_extra_outputs(hello_gpio_irq)
+    # enable usb output, disable uart output
+    pico_enable_stdio_usb(hello_gpio_irq 1)
+    pico_enable_stdio_uart(hello_gpio_irq 0)
 
-# add url via pico_set_program_url
+    # create map/bin/hex/uf2 file etc.
+    pico_add_extra_outputs(hello_gpio_irq)
+
+    # add url via pico_set_program_url
+elseif(PICO_ON_DEVICE)
+    message("Skipping hello_usb because TinyUSB submodule is not initialized in the SDK")
+endif()

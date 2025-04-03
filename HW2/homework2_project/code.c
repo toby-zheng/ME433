@@ -10,11 +10,15 @@
 
 #define GPIO_WATCH_PIN 2
 
+// global vars
 volatile bool led_on = true;
 volatile int count = 0;
+
 static char event_str[128];
 
 void gpio_event_string(char *buf, uint32_t events);
+
+// Example code from blink
 
 // Perform initialisation
 int pico_led_init(void) {
@@ -29,7 +33,7 @@ int pico_led_init(void) {
         return cyw43_arch_init();
     #endif
     }
-    
+
 // Turn the led on or off
 void pico_set_led(bool led_on) {
     #if defined(PICO_DEFAULT_LED_PIN)
@@ -42,10 +46,9 @@ void pico_set_led(bool led_on) {
     }
 
 void gpio_callback() {
-    // Put the GPIO event(s) that just happened into event_str
-    // so we can print it
     pico_set_led(led_on);
     printf("Button press Number: %d\n", count);
+    // toggle LED and iterate count
     led_on = !led_on;
     count ++;
 }

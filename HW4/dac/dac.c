@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 
@@ -10,6 +11,9 @@
 #define PIN_CS   20     // can be any GPIO
 #define PIN_SCK  18
 #define PIN_MOSI 19
+
+float sine_array[200];
+float triangle_array[100]; 
 
 static inline void cs_select(uint cs_pin) {
     asm volatile("nop \n nop \n nop"); // FIXME
@@ -23,6 +27,7 @@ static inline void cs_deselect(uint cs_pin) {
     asm volatile("nop \n nop \n nop"); // FIXME
 }
 
+void wave_array_init();
 void writeDAC(char dac_select, float voltage);
 
 int main()
@@ -41,17 +46,45 @@ int main()
     gpio_put(PIN_CS, 1);
     // For more examples of SPI use see https://github.com/raspberrypi/pico-examples/tree/master/spi
 
-    while (true) {
-        printf("Hello, world!\n");
-        sleep_ms(1000);
-        writeDAC('B', 0);
-        writeDAC('A', 1.625);
-        sleep_ms(1000);
-        writeDAC('B', 3.3);
-        writeDAC('A', 0);
+    wave_array_init();
+    
+    int i = 0;
+    int j = 0;
+        while (true) {
+            // 2 sine cycles per second, 1 triangleke
+            printf("Hello, world!\n");
+            writeDAC('A', sine_array[i]);
+            writeDAC('B', triangle_array[j]);
+            i++;
+            j++;
+            sleep_us(2500);
+            writeDAC('A', sine_array[i]);
+            i++;
+            sleep_us(2500);
+            writeDAC('A', sine_array[i]);
+            i++;
+            sleep_us(2500);
+            writeDAC('A', sine_array[i]);
+            i++;
+            sleep_us(2500);
+            if (i >= 200) i = 0;
+            if (j >= 100) j = 0;
+        }
+    }
+ 
+void wave_array_init() {
+    for (int i = 0; i < 200; i++) {
+        float t = (float) i / 200.0;
+        sine_array[i] = 1.65 + 1.65*sinf(2 * 3.14159 * 1.0 * t);
+    }
+
+    for (int i = 0; i < 50; i++) {
+        float value = 3.3 * (float) i / 49.0;
+        triangle_array[i] = value;
+        triangle_array[i + 50] = 3.3 - value;
     }
 }
- 
+
 void writeDAC(char dac_select, float voltage) {
     uint16_t msg, voltage_bits;
     uint8_t data[2];
@@ -66,7 +99,6 @@ void writeDAC(char dac_select, float voltage) {
             dac_select_bit = 1;
             break;
         default:
-            dac_select_bit = -1;
             printf("!!!Error in DAC Select bit\n");
             break;
     }
